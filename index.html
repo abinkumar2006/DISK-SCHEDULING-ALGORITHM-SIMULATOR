@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Disk Scheduling Simulator</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            background: #f4f4f4;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            margin: 50px auto;
+            width: 350px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px gray;
+        }
+
+        input, select {
+            width: 90%;
+            padding: 8px;
+            margin: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: blue;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        h1 {
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Disk Scheduling Simulator</h1>
+
+<div class="container">
+    <label>Disk Requests:</label><br>
+    <input type="text" id="requests" placeholder="98,183,37,122,14"><br>
+
+    <label>Initial Head:</label><br>
+    <input type="number" id="head" placeholder="53"><br>
+
+    <label>Algorithm:</label><br>
+    <select id="algorithm">
+        <option value="fcfs">FCFS</option>
+        <option value="sstf">SSTF</option>
+    </select><br>
+
+    <button onclick="calculate()">Calculate</button>
+
+    <h3 id="order"></h3>
+    <h3 id="seek"></h3>
+</div>
+
+<script>
+function calculate() {
+    let req = document.getElementById("requests").value.split(",").map(Number);
+    let head = parseInt(document.getElementById("head").value);
+    let algo = document.getElementById("algorithm").value;
+
+    let order = [];
+    let seek = 0;
+
+    if (algo === "fcfs") {
+        order = [head, ...req];
+
+        for (let i = 0; i < req.length; i++) {
+            seek += Math.abs(head - req[i]);
+            head = req[i];
+        }
+    }
+
+    else if (algo === "sstf") {
+        let requests = [...req];
+        order.push(head);
+
+        while (requests.length > 0) {
+            let minDist = Math.abs(head - requests[0]);
+            let index = 0;
+
+            for (let i = 1; i < requests.length; i++) {
+                let dist = Math.abs(head - requests[i]);
+                if (dist < minDist) {
+                    minDist = dist;
+                    index = i;
+                }
+            }
+
+            seek += minDist;
+            head = requests[index];
+            order.push(head);
+            requests.splice(index, 1);
+        }
+    }
+
+    document.getElementById("order").innerText =
+        "Order: " + order.join(" → ");
+
+    document.getElementById("seek").innerText =
+        "Total Seek Time: " + seek;
+}
+</script>
+
+</body>
+</html>
